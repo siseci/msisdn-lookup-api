@@ -1,8 +1,20 @@
-# 📡 MSISDN Lookup API
+<p align="center">
+  <img src="https://antigravity.google/assets/image/antigravity-logo.png" alt="Antigravity Logo" width="80" />
+</p>
 
-Verilen telefon numaralarına (MSISDN) göre **ülke**, **operatör**, **MCC**, **MNC**, **hat türü** ve coğrafi bilgileri anında döndüren yüksek performanslı bir REST API.
+<h1 align="center">📡 MSISDN Lookup API</h1>
 
-**Python · FastAPI · port 8090**
+<p align="center">
+  Verilen telefon numaralarına (MSISDN) göre <strong>ülke</strong>, <strong>operatör</strong>, <strong>MCC</strong>, <strong>MNC</strong>, <strong>hat türü</strong> ve coğrafi bilgileri anında döndüren yüksek performanslı bir REST API.
+</p>
+
+<p align="center">
+  <strong>Python · FastAPI · port 8090</strong>
+</p>
+
+<p align="center">
+  <a href="https://antigravity.google"><img src="https://img.shields.io/badge/Built%20with-Google%20Antigravity-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Built with Antigravity" /></a>
+</p>
 
 ---
 
@@ -600,3 +612,11 @@ MIT License. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 ## 🤝 Katkıda Bulunma
 
 Pull request ve issue'lar memnuniyetle karşılanır. Yeni bir özellik eklemeden önce bir issue açmanız önerilir.
+
+---
+
+<p align="center">
+  <img src="https://antigravity.google/assets/image/antigravity-logo.png" alt="Antigravity" width="40" />
+  <br />
+  <strong>🚀 <a href="https://antigravity.google">Google Antigravity</a> ile geliştirilmiştir.</strong>
+</p>

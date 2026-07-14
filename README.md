@@ -5,7 +5,7 @@
 <h1 align="center">📡 MSISDN Lookup API</h1>
 
 <p align="center">
-  Verilen telefon numaralarına (MSISDN) göre <strong>ülke</strong>, <strong>operatör</strong>, <strong>MCC</strong>, <strong>MNC</strong>, <strong>hat türü</strong> ve coğrafi bilgileri anında döndüren yüksek performanslı bir REST API.
+  High-performance REST API that instantly returns <strong>country</strong>, <strong>operator</strong>, <strong>MCC</strong>, <strong>MNC</strong>, <strong>number type</strong> and geographic info for any phone number (MSISDN).
 </p>
 
 <p align="center">
@@ -15,6 +15,458 @@
 <p align="center">
   <a href="https://antigravity.google"><img src="https://img.shields.io/badge/Built%20with-Google%20Antigravity-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Built with Antigravity" /></a>
 </p>
+
+<p align="center">
+  <strong>🇬🇧 English</strong> · <a href="#-msisdn-lookup-api-1">🇹🇷 Türkçe</a>
+</p>
+
+---
+
+## ✨ Features
+
+- 🚀 **High performance** — 11,000+ lookups/sec (bulk), ~1ms/req (single)
+- 🌍 **231 countries, 3,094 operators** supported
+- 📦 **Bulk endpoint** — up to 10,000 MSISDNs per request
+- 🔢 **Flexible formats** — `+905321234567`, `905321234567`, `00905321234567` all accepted
+- ✅ **Validation** — RFC-standard validation via Google libphonenumber
+- 💾 **Fully offline** — All data loaded into RAM at startup, no external dependencies
+- 📖 **Swagger UI** — auto-generated API docs at `/docs`
+
+---
+
+## 📋 Response Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `msisdn` | string | Raw input number |
+| `e164` | string | E.164 formatted number |
+| `valid` | bool | Whether the number is valid |
+| `possible` | bool | Whether the number has a valid length |
+| `number_type` | string | `MOBILE`, `FIXED_LINE`, `FIXED_LINE_OR_MOBILE`, `VOIP`, etc. |
+| `country_code` | int | International dialing code (e.g. `90`) |
+| `country_iso` | string | ISO 3166-1 alpha-2 country code (e.g. `TR`) |
+| `country_name` | string | Country name (English) |
+| `mcc` | string | Mobile Country Code — 3 digits |
+| `mnc` | string | Mobile Network Code — 2-3 digits |
+| `brand` | string | Operator brand name (e.g. `Turkcell`) |
+| `operator` | string | Operator's official full name |
+| `status` | string | `Operational`, `Not operational`, `Unknown` |
+| `bands` | string | Supported frequency bands |
+| `geo_description` | string | Geographic location description |
+| `error` | string \| null | Error message (for invalid numbers) |
+
+---
+
+## 🚀 Installation & Setup
+
+### Requirements
+
+- Python 3.9+
+- pip
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/siseci/msisdn-lookup-api.git
+cd msisdn-lookup-api
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Download MCC/MNC database
+
+```bash
+python download_data.py
+```
+
+### 4. Start the server
+
+```bash
+# Single worker (default)
+python main.py
+
+# Or via start.sh
+./start.sh
+
+# Multiple workers (based on CPU cores)
+./start.sh 4
+
+# Or directly via uvicorn
+python -m uvicorn main:app --host 0.0.0.0 --port 8090 --workers 2
+```
+
+Server starts at `http://localhost:8090`.
+
+---
+
+## 🔌 API Usage
+
+### GET `/lookup` — Single MSISDN Lookup
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|---|---|---|
+| `msisdn` | ✅ | Phone number to look up |
+
+**Example Request:**
+
+```bash
+curl "http://localhost:8090/lookup?msisdn=+905321234567"
+```
+
+**Example Response — 🇹🇷 Turkey / Turkcell:**
+
+```json
+{
+  "msisdn": "+905321234567",
+  "e164": "+905321234567",
+  "valid": true,
+  "possible": true,
+  "number_type": "MOBILE",
+  "country_code": 90,
+  "country_iso": "TR",
+  "country_name": "Turkey",
+  "mcc": "286",
+  "mnc": "01",
+  "brand": "Turkcell",
+  "operator": "Turkcell Iletisim Hizmetleri A.S.",
+  "status": "Operational",
+  "bands": "GSM 900 / UMTS 900 / UMTS 2100 / LTE 800 / LTE 1800 / LTE 2100 / LTE 2600",
+  "geo_description": "Turkey",
+  "error": null
+}
+```
+
+**Example Response — 🇹🇷 Turkey / Vodafone:**
+
+```json
+{
+  "msisdn": "+905421234567",
+  "e164": "+905421234567",
+  "valid": true,
+  "possible": true,
+  "number_type": "MOBILE",
+  "country_code": 90,
+  "country_iso": "TR",
+  "country_name": "Turkey",
+  "mcc": "286",
+  "mnc": "02",
+  "brand": "Vodafone",
+  "operator": "Vodafone Turkey",
+  "status": "Operational",
+  "bands": "GSM 900 / UMTS 2100 / LTE 800 / LTE 900 / LTE 1800 / LTE 2100 / LTE 2600 / TD-LTE 2600",
+  "geo_description": "Turkey",
+  "error": null
+}
+```
+
+**Example Response — 🇩🇪 Germany / Vodafone:**
+
+```json
+{
+  "msisdn": "+4915212345678",
+  "e164": "+4915212345678",
+  "valid": true,
+  "possible": true,
+  "number_type": "MOBILE",
+  "country_code": 49,
+  "country_iso": "DE",
+  "country_name": "Germany",
+  "mcc": "262",
+  "mnc": "02",
+  "brand": "Vodafone",
+  "operator": "Vodafone D2 GmbH",
+  "status": "Operational",
+  "bands": "GSM 900 / LTE 700 / LTE 800 / LTE 900 / LTE 1800 / LTE 2100 / LTE 2600 / 5G 700 / 5G 1800 / 5G 3500",
+  "geo_description": "Germany",
+  "error": null
+}
+```
+
+**Example Response — 🇫🇷 France / SFR:**
+
+```json
+{
+  "msisdn": "+33612345678",
+  "e164": "+33612345678",
+  "valid": true,
+  "possible": true,
+  "number_type": "MOBILE",
+  "country_code": 33,
+  "country_iso": "FR",
+  "country_name": "France",
+  "mcc": "208",
+  "mnc": "13",
+  "brand": "SFR",
+  "operator": "Altice",
+  "status": "Operational",
+  "bands": "GSM 900 / UMTS 900 / UMTS 2100 / LTE 800 / LTE 1800 / LTE 2100 / LTE 2600 / 5G 3500",
+  "geo_description": "France",
+  "error": null
+}
+```
+
+**Example Response — 🇷🇺 Russia / MTS:**
+
+```json
+{
+  "msisdn": "+79161234567",
+  "e164": "+79161234567",
+  "valid": true,
+  "possible": true,
+  "number_type": "MOBILE",
+  "country_code": 7,
+  "country_iso": "RU",
+  "country_name": "Russian Federation",
+  "mcc": "250",
+  "mnc": "01",
+  "brand": "MTS",
+  "operator": "Mobile TeleSystems",
+  "status": "Operational",
+  "bands": "GSM 900 / GSM 1800 / UMTS 900 / UMTS 2100 / LTE 800 / LTE 900 / LTE 1800 / LTE 2100 / LTE 2600 / TD-LTE 2600 / 5G 4700",
+  "geo_description": "Russia",
+  "error": null
+}
+```
+
+**Example Response — 🇨🇳 China / China Mobile:**
+
+```json
+{
+  "msisdn": "+8613800138000",
+  "e164": "+8613800138000",
+  "valid": true,
+  "possible": true,
+  "number_type": "MOBILE",
+  "country_code": 86,
+  "country_iso": "CN",
+  "country_name": "China",
+  "mcc": "460",
+  "mnc": "08",
+  "brand": "China Mobile",
+  "operator": "China Mobile",
+  "status": "Unknown",
+  "bands": "Unknown",
+  "geo_description": "Beijing",
+  "error": null
+}
+```
+
+**Example Response — 🇺🇸 USA (San Francisco):**
+
+```json
+{
+  "msisdn": "+14155552671",
+  "e164": "+14155552671",
+  "valid": true,
+  "possible": true,
+  "number_type": "FIXED_LINE_OR_MOBILE",
+  "country_code": 1,
+  "country_iso": "US",
+  "country_name": "United States of America",
+  "mcc": "316",
+  "mnc": "010",
+  "brand": "Nextel",
+  "operator": "Nextel Communications",
+  "status": "Not operational",
+  "bands": "iDEN 800",
+  "geo_description": "San Francisco, CA",
+  "error": null
+}
+```
+
+**Example Response — 🇯🇵 Japan / KDDI:**
+
+```json
+{
+  "msisdn": "+819012345678",
+  "e164": "+819012345678",
+  "valid": true,
+  "possible": true,
+  "number_type": "MOBILE",
+  "country_code": 81,
+  "country_iso": "JP",
+  "country_name": "Japan",
+  "mcc": "441",
+  "mnc": "00",
+  "brand": "KDDI",
+  "operator": "Wireless City Planning Inc.",
+  "status": "Operational",
+  "bands": "TD-LTE 2500",
+  "geo_description": "Japan",
+  "error": null
+}
+```
+
+**Example Response — ❌ Invalid Number (HTTP 400):**
+
+```bash
+curl "http://localhost:8090/lookup?msisdn=invalid_number"
+```
+
+```json
+{
+  "detail": "Cannot parse MSISDN: (1) The string supplied did not seem to be a phone number."
+}
+```
+
+---
+
+### POST `/bulk` — Bulk MSISDN Lookup
+
+Query up to 10,000 MSISDNs in a single request.
+
+**Request Body:**
+
+```json
+{
+  "msisdns": ["<msisdn1>", "<msisdn2>", "..."]
+}
+```
+
+**Example Request:**
+
+```bash
+curl -X POST "http://localhost:8090/bulk" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "msisdns": [
+      "+905321234567",
+      "+905059876543",
+      "+447911123456",
+      "+14155552671",
+      "bad_num"
+    ]
+  }'
+```
+
+**Example Response:**
+
+```json
+[
+  {
+    "msisdn": "+905321234567",
+    "e164": "+905321234567",
+    "valid": true,
+    "possible": true,
+    "number_type": "MOBILE",
+    "country_code": 90,
+    "country_iso": "TR",
+    "country_name": "Turkey",
+    "mcc": "286",
+    "mnc": "01",
+    "brand": "Turkcell",
+    "operator": "Turkcell Iletisim Hizmetleri A.S.",
+    "status": "Operational",
+    "bands": "GSM 900 / UMTS 900 / UMTS 2100 / LTE 800 / LTE 1800 / LTE 2100 / LTE 2600",
+    "geo_description": "Turkey"
+  },
+  {
+    "msisdn": "bad_num",
+    "valid": false,
+    "possible": false,
+    "error": "Cannot parse MSISDN: (1) The string supplied did not seem to be a phone number."
+  }
+]
+```
+
+> ℹ️ Invalid numbers are marked with the `"error"` field; other results are not affected.
+
+---
+
+### GET `/health` — Health Check
+
+```bash
+curl "http://localhost:8090/health"
+```
+
+```json
+{
+  "status": "ok",
+  "mcc_mnc_records_indexed": 2988,
+  "countries_indexed": 231,
+  "brand_index_size": 2268
+}
+```
+
+---
+
+## ⚡ Performance
+
+Test environment: Apple M-series, Python 3.14, single worker (uvicorn)
+
+| Scenario | Result |
+|---|---|
+| **Bulk — 1,000 MSISDNs** | ~87ms → **11,463 lookups/sec** |
+| **Single endpoint** | ~1ms/req → **~970 req/sec** |
+| **Startup time** | ~9ms (data loaded into RAM) |
+| **RAM usage** | ~45 MB (3,094 records + indexes) |
+
+### Scaling for Millions of Queries
+
+Use `gunicorn` with multiple workers to utilize all CPU cores:
+
+```bash
+pip install gunicorn
+gunicorn main:app -w 8 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8090
+```
+
+---
+
+## 📂 Project Structure
+
+```
+msisdn-lookup-api/
+├── main.py               # FastAPI app & lookup engine
+├── download_data.py      # Download MCC/MNC database
+├── requirements.txt      # Python dependencies
+├── start.sh              # Server startup script
+└── data/
+    └── mcc_mnc_list.json # MCC/MNC database (3,094 records)
+```
+
+---
+
+## ⚠️ Limitations
+
+> **No MNP (Mobile Number Portability) support.**
+>
+> This API uses static prefix-based matching. If a subscriber has ported their number to another operator, the API may return the original operator. For real-time accurate operator detection, HLR (Home Location Register) lookup services are required.
+
+| Scenario | Accuracy |
+|---|---|
+| Country detection | ✅ ~99.9% |
+| MCC detection | ✅ ~99% |
+| Number type (MOBILE vs FIXED) | ✅ ~95% |
+| Operator / MNC (without porting) | ✅ ~80-90% |
+| Operator / MNC (ported numbers) | ⚠️ Unreliable |
+
+---
+
+## 📄 License
+
+MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+<br><br>
+
+<p align="center">
+  <a href="#-msisdn-lookup-api">🇬🇧 English</a> · <strong>🇹🇷 Türkçe</strong>
+</p>
+
+---
+
+# 📡 MSISDN Lookup API
+
+Verilen telefon numaralarına (MSISDN) göre **ülke**, **operatör**, **MCC**, **MNC**, **hat türü** ve coğrafi bilgileri anında döndüren yüksek performanslı bir REST API.
+
+**Python · FastAPI · port 8090**
 
 ---
 
@@ -63,7 +515,7 @@
 ### 1. Repoyu klonla
 
 ```bash
-git clone https://github.com/kullanici/msisdn-lookup-api.git
+git clone https://github.com/siseci/msisdn-lookup-api.git
 cd msisdn-lookup-api
 ```
 
@@ -78,8 +530,6 @@ pip install -r requirements.txt
 ```bash
 python download_data.py
 ```
-
-> Alternatif olarak `data/mcc_mnc_list.json` dosyasını elle oluşturun (bkz. [Veri Kaynağı](#veri-kaynağı)).
 
 ### 4. Sunucuyu başlat
 
@@ -365,57 +815,6 @@ curl -X POST "http://localhost:8090/bulk" \
     "geo_description": "Turkey"
   },
   {
-    "msisdn": "+905059876543",
-    "e164": "+905059876543",
-    "valid": true,
-    "possible": true,
-    "number_type": "MOBILE",
-    "country_code": 90,
-    "country_iso": "TR",
-    "country_name": "Turkey",
-    "mcc": "286",
-    "mnc": "01",
-    "brand": "Turkcell",
-    "operator": "Turkcell Iletisim Hizmetleri A.S.",
-    "status": "Operational",
-    "bands": "GSM 900 / UMTS 900 / UMTS 2100 / LTE 800 / LTE 1800 / LTE 2100 / LTE 2600",
-    "geo_description": "Turkey"
-  },
-  {
-    "msisdn": "+447911123456",
-    "e164": "+447911123456",
-    "valid": true,
-    "possible": true,
-    "number_type": "MOBILE",
-    "country_code": 44,
-    "country_iso": "GG",
-    "country_name": "Guernsey (United Kingdom)",
-    "mcc": "234",
-    "mnc": "50",
-    "brand": "JT",
-    "operator": "JT Group Limited",
-    "status": "Operational",
-    "bands": "GSM 1800 / UMTS 900 / UMTS 2100 / LTE 800 / LTE 1800 / LTE 2600",
-    "geo_description": "Guernsey"
-  },
-  {
-    "msisdn": "+14155552671",
-    "e164": "+14155552671",
-    "valid": true,
-    "possible": true,
-    "number_type": "FIXED_LINE_OR_MOBILE",
-    "country_code": 1,
-    "country_iso": "US",
-    "country_name": "United States of America",
-    "mcc": "316",
-    "mnc": "010",
-    "brand": "Nextel",
-    "operator": "Nextel Communications",
-    "status": "Not operational",
-    "bands": "iDEN 800",
-    "geo_description": "San Francisco, CA"
-  },
-  {
     "msisdn": "bad_num",
     "valid": false,
     "possible": false,
@@ -424,7 +823,7 @@ curl -X POST "http://localhost:8090/bulk" \
 ]
 ```
 
-> ℹ️ Hatalı numara içeren satirlar `"error"` alanıyla işaretlenir; diğer sonuçlar etkilenmez.
+> ℹ️ Hatalı numara içeren satırlar `"error"` alanıyla işaretlenir; diğer sonuçlar etkilenmez.
 
 ---
 
@@ -441,26 +840,6 @@ curl "http://localhost:8090/health"
   "countries_indexed": 231,
   "brand_index_size": 2268
 }
-```
-
----
-
-### GET `/docs` — Swagger UI
-
-Tarayıcıdan `http://localhost:8090/docs` adresine giderek interaktif API dokümantasyonuna ulaşabilirsiniz.
-
----
-
-## 📂 Proje Yapısı
-
-```
-msisdn-lookup-api/
-├── main.py               # FastAPI uygulaması & lookup engine
-├── download_data.py      # MCC/MNC veritabanını indir
-├── requirements.txt      # Python bağımlılıkları
-├── start.sh              # Sunucu başlatma scripti
-└── data/
-    └── mcc_mnc_list.json # MCC/MNC veritabanı (3094 kayıt)
 ```
 
 ---
@@ -487,50 +866,17 @@ gunicorn main:app -w 8 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8090
 
 ---
 
-## 🔢 MSISDN Format Desteği
-
-API aşağıdaki tüm formatlarda numara kabul eder:
-
-| Format | Örnek |
-|---|---|
-| E.164 (+ ile) | `+905321234567` |
-| Ülke kodu (+ olmadan) | `905321234567` |
-| 00 ön eki | `00905321234567` |
-| Boşluk/tire ile | `+90 532 123 45 67` |
-
----
-
-## 🧩 Mimarisi
+## 📂 Proje Yapısı
 
 ```
-HTTP İsteği
-    │
-    ▼
-FastAPI (async endpoint)
-    │
-    ▼
-phonenumbers.parse()          ← Google libphonenumber
-    │
-    ├── region_code_for_number()   → ISO kodu (TR, DE, FR...)
-    ├── carrier.name_for_number()  → Operatör adı (Turkcell...)
-    ├── geocoder.description()     → Coğrafi açıklama
-    └── number_type()              → MOBILE / FIXED_LINE / ...
-    │
-    ▼
-In-Memory Hash Lookup
-    │
-    ├── ISO → MCC eşlemesi        → O(1)
-    └── MCC:ISO:Brand index       → O(1)
-    │
-    ▼
-JSON Yanıt (orjson ile serialize)
+msisdn-lookup-api/
+├── main.py               # FastAPI uygulaması & lookup engine
+├── download_data.py      # MCC/MNC veritabanını indir
+├── requirements.txt      # Python bağımlılıkları
+├── start.sh              # Sunucu başlatma scripti
+└── data/
+    └── mcc_mnc_list.json # MCC/MNC veritabanı (3094 kayıt)
 ```
-
-### Lookup Stratejisi
-
-1. **Tam eşleşme:** `phonenumbers` kütüphanesinin döndürdüğü carrier adı, MCC/MNC veritabanındaki brand ile normalize edilerek karşılaştırılır.
-2. **Kısmi eşleşme:** Brand adı, carrier adını içeriyorsa ya da tam tersi ise `Operational` kayıt seçilir.
-3. **Fallback:** Carrier eşleşmesi bulunamazsa, ülkeye ait ilk `Operational` operatör döndürülür.
 
 ---
 
@@ -540,8 +886,6 @@ JSON Yanıt (orjson ile serialize)
 >
 > Bu API, statik prefix tabanlı eşleştirme yapar. Eğer bir abone numarasını başka bir operatöre taşımışsa (Mobile Number Portability), API orijinal operatörü döndürebilir. Gerçek zamanlı ve doğru operatör tespiti için HLR (Home Location Register) lookup hizmetleri gerekir.
 
-Kullanım senaryolarına göre doğruluk beklentisi:
-
 | Senaryo | Doğruluk |
 |---|---|
 | Ülke tespiti | ✅ ~%99.9 |
@@ -549,16 +893,6 @@ Kullanım senaryolarına göre doğruluk beklentisi:
 | Numara tipi (MOBILE vs FIXED) | ✅ ~%95 |
 | Operatör / MNC (taşıma olmadan) | ✅ ~%80-90 |
 | Operatör / MNC (taşımalı hatlar) | ⚠️ Güvenilmez |
-
----
-
-## 📡 Veri Kaynağı
-
-Operatör veritabanı [pbakondy/mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list) kaynağından alınmaktadır (Wikipedia tabanlı, topluluk tarafından güncellenmektedir). Veriyi güncellemek için:
-
-```bash
-python download_data.py
-```
 
 ---
 
@@ -592,6 +926,16 @@ for item in r.json():
 
 ---
 
+## 📡 Veri Kaynağı
+
+Operatör veritabanı [pbakondy/mcc-mnc-list](https://github.com/pbakondy/mcc-mnc-list) kaynağından alınmaktadır (Wikipedia tabanlı, topluluk tarafından güncellenmektedir). Veriyi güncellemek için:
+
+```bash
+python download_data.py
+```
+
+---
+
 ## 🛠️ Bağımlılıklar
 
 | Paket | Versiyon | Açıklama |
@@ -618,5 +962,5 @@ Pull request ve issue'lar memnuniyetle karşılanır. Yeni bir özellik eklemede
 <p align="center">
   <img src="https://antigravity.google/assets/image/antigravity-logo.png" alt="Antigravity" width="40" />
   <br />
-  <strong>🚀 <a href="https://antigravity.google">Google Antigravity</a> ile geliştirilmiştir.</strong>
+  <strong>🚀 <a href="https://antigravity.google">Google Antigravity</a> ile geliştirilmiştir. / Built with <a href="https://antigravity.google">Google Antigravity</a>.</strong>
 </p>

@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+env/
+venv/
+.venv/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Data (büyük dosya; her ortamda `download_data.py` ile indirilir)
+# data/mcc_mnc_list.json  ← Küçük (~500KB) olduğu için repo'ya dahil ediyoruz
+
+# OS
+.DS_Store
+desktop.ini
